@@ -5,19 +5,30 @@ import os
 from datetime import datetime
 import Conectar_DB as connect
 
+titulo = "ND: La salud es lo primero"
+
+def directorio_img(elemento):
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    IMG_DIR = os.path.join(BASE_DIR, "img")
+    path = os.path.join(IMG_DIR, elemento)
+    return path
+
+icon_path = directorio_img("ND_icono.ico")
+
 # ==========================
 # MENÚ PRINCIPAL
 # ==========================
 def menu_principal(nombre):
-    global ventana_menu, nom
+    global ventana_menu, nom, icon_path, titulo
     nom = nombre
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    IMG_DIR = os.path.join(BASE_DIR, "img")
-    imagen_path = os.path.join(IMG_DIR, "fondo_interfaz.jpg")
+    imagen_path = directorio_img("fondo_interfaz.jpg")
     ventana_menu = tk.Tk()
-    ventana_menu.title("Menú")
+    ventana_menu.title(titulo)
     ventana_menu.geometry("400x300")
     ventana_menu.configure(bg="#e6f0ff")
+
+    if os.path.exists(icon_path):
+        ventana_menu.iconbitmap(icon_path)
 
     try:
         if os.path.exists(imagen_path):
@@ -30,7 +41,7 @@ def menu_principal(nombre):
         messagebox.showerror("Error", str(e))
 
     tk.Label(ventana_menu, text="Menú principal", font=("Arial", 14, "bold")).pack(pady=30)
-    tk.Label(ventana_menu, text=f"Hola: {nombre}", font=("Arial", 12)).pack(pady=5)
+    tk.Label(ventana_menu, text=f"Hola: {nombre}", font=("Arial", 12)).place(relx=1.0, y=10, anchor="ne")
     tk.Button(ventana_menu, text="Empleados", width=20, height=2, bg="#007A8D", fg="white", 
               command=menu_empleados).pack(pady=10)
     tk.Button(ventana_menu, text="Doctores", width=20, height=2, bg="#00C0DE", fg="white",
@@ -46,6 +57,7 @@ def menu_principal(nombre):
 # FUNCIONES DE CONSULTA
 # ==========================
 def consultar_empleados():
+    global icon_path, titulo
     conn = connect.conectar()
     if conn:
         try:
@@ -56,8 +68,11 @@ def consultar_empleados():
             conn.close()
 
             ventana_consulta = tk.Toplevel()
-            ventana_consulta.title("Consulta de Empleados")
+            ventana_consulta.title(titulo)
             ventana_consulta.geometry("800x400")
+
+            if os.path.exists(icon_path):
+                ventana_consulta.iconbitmap(icon_path)
 
             tree = ttk.Treeview(ventana_consulta, columns=("ID","Nombre","Dirección","Teléfono","Fecha","Sexo","Sueldo","Turno"), show="headings")
             for col in tree["columns"]:
@@ -71,6 +86,7 @@ def consultar_empleados():
             messagebox.showerror("Error", f"No se pudo consultar:\n{e}")
 
 def consultar_doctores():
+    global icon_path, titulo
     conn = connect.conectar()
     if conn:
         try:
@@ -81,8 +97,11 @@ def consultar_doctores():
             conn.close()
 
             ventana_consulta = tk.Toplevel()
-            ventana_consulta.title("Consulta de Doctores")
+            ventana_consulta.title(titulo)
             ventana_consulta.geometry("800x400")
+
+            if os.path.exists(icon_path):
+                ventana_consulta.iconbitmap(icon_path)
 
             tree = ttk.Treeview(ventana_consulta, columns=("ID","Nombre","Dirección","Teléfono","Fecha","Sexo","Especialidad"), show="headings")
             for col in tree["columns"]:
@@ -178,11 +197,15 @@ def insertar_doctor():
 # MENÚ DE EMPLEADOS
 # ==========================
 def menu_empleados():
+    global icon_path, titulo
     ventana_menu.destroy()
     ventana_emp_menu = tk.Tk()
-    ventana_emp_menu.title("Menú de Empleados")
+    ventana_emp_menu.title(titulo)
     ventana_emp_menu.geometry("400x350")
     ventana_emp_menu.configure(bg="#e6f0ff")
+
+    if os.path.exists(icon_path):
+        ventana_emp_menu.iconbitmap(icon_path)
 
     tk.Label(ventana_emp_menu, text="Gestión de Empleados", font=("Arial", 16, "bold")).pack(pady=20)
     tk.Button(ventana_emp_menu, text=" Insertar Empleado", bg="#007A8D", fg="white", width=25, height=2, 
@@ -198,11 +221,15 @@ def menu_empleados():
 # MENÚ DE DOCTORES
 # ==========================
 def menu_doctores():
+    global icon_path, titulo
     ventana_menu.destroy()
     ventana_doc_menu = tk.Tk()
-    ventana_doc_menu.title("Menú de Doctores")
+    ventana_doc_menu.title(titulo)
     ventana_doc_menu.geometry("400x350")
     ventana_doc_menu.configure(bg="#e6f0ff")
+
+    if os.path.exists(icon_path):
+        ventana_doc_menu.iconbitmap(icon_path)
 
     tk.Label(ventana_doc_menu, text="Gestión de Doctores", font=("Arial", 16, "bold")).pack(pady=20)
     tk.Button(ventana_doc_menu, text=" Insertar Doctor", bg="#007A8D", fg="white", width=25, height=2, 
@@ -219,10 +246,14 @@ def menu_doctores():
 # ==========================
 def abrir_empleado():
     global entry_id, entry_nombre, entry_direccion, entry_telefono, entry_fecha, combo_sexo, entry_sueldo, combo_turno, entry_contrasena
+    global nom, icon_path, titulo
     ventana_emp = tk.Tk()
-    ventana_emp.title("Gestión de Empleados")
+    ventana_emp.title(titulo)
     ventana_emp.geometry("900x600")
     ventana_emp.configure(bg="#e6f0ff")
+
+    if os.path.exists(icon_path):
+        ventana_emp.iconbitmap(icon_path)
 
     frame = tk.LabelFrame(ventana_emp, text="Insertar Empleado", padx=10, pady=10)
     frame.pack(fill="x", padx=10, pady=10)
@@ -250,7 +281,7 @@ def abrir_empleado():
 
     tk.Button(frame, text="Insertar Empleado", command=insertar_empleado,bg="#00C0DE", fg="white").grid(row=len(campos), column=0, pady=15)
     tk.Button(ventana_emp, text="↩ Volver al menú principal",  bg="#005563", fg="white", width=25, height=2, 
-              command=lambda:[ventana_emp.destroy(), menu_principal()]).place(relx=0.40, rely=0.95, anchor="se")
+              command=lambda:[ventana_emp.destroy(), menu_principal(nom)]).place(relx=0.40, rely=0.95, anchor="se")
     tk.Button(ventana_emp, text="Salir", bg="#828181", fg="white", width=25, height=2, 
               command=ventana_emp.destroy).place(relx=0.95, rely=0.95, anchor="se")
 
@@ -258,12 +289,16 @@ def abrir_empleado():
 # VENTANA DE DOCTORES
 # ==========================
 def abrir_doctores():
-    global entry_doc_id, entry_doc_nombre, entry_doc_direccion, entry_doc_telefono, entry_doc_fecha, combo_doc_sexo, entry_doc_especialidad, entry_doc_contrasena
+    global entry_doc_id, entry_doc_nombre, entry_doc_direccion, entry_doc_telefono, entry_doc_fecha, combo_doc_sexo, entry_doc_especialidad, entry_doc_contrasena 
+    global nom, icon_path, titulo
 
     ventana_doc = tk.Tk()
-    ventana_doc.title("Gestión de Doctores")
+    ventana_doc.title(titulo)
     ventana_doc.geometry("900x600")
     ventana_doc.configure(bg="#e6f0ff")
+
+    if os.path.exists(icon_path):
+        ventana_doc.iconbitmap(icon_path)
 
     frame = tk.LabelFrame(ventana_doc, text="Insertar nuevo doctor", padx=10, pady=10)
     frame.pack(fill="x", padx=10, pady=10)
@@ -292,6 +327,6 @@ def abrir_doctores():
     tk.Button(frame, text="Insertar Doctor", command=insertar_doctor,
               bg="#00C0DE", fg="white").grid(row=len(campos_doc), column=0, columnspan=2, pady=15)
     tk.Button(ventana_doc, text="↩ Volver al menú principal", bg="#005563", fg="white", width=25, height=2, 
-              command=lambda:[ventana_doc.destroy(), menu_principal()]).place(relx=0.40, rely=0.95, anchor="se")
+              command=lambda:[ventana_doc.destroy(), menu_principal(nom)]).place(relx=0.40, rely=0.95, anchor="se")
     tk.Button(ventana_doc, text="Salir", bg="#828181", fg="white", width=25, height=2, 
               command=ventana_doc.destroy).place(relx=0.95, rely=0.95, anchor="se")

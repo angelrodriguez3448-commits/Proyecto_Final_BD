@@ -5,20 +5,32 @@ import os
 from datetime import datetime
 import Conectar_DB as connect
 
+def directorio_img(elemento):
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    IMG_DIR = os.path.join(BASE_DIR, "img")
+    path = os.path.join(IMG_DIR, elemento)
+    return path
+
+icon_path = directorio_img("ND_icono.ico")
+
+titulo = "ND: La salud es lo primero"
+
 # ==========================
 # VISTA EMPLEADO (Vista empleado)
 # ==========================
 def vista_empleado(nombre):
-    global ventana_empleado, nom
+    global ventana_empleado, nom, icon_path, titulo
     nom = nombre
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    IMG_DIR = os.path.join(BASE_DIR, "img")
-    imagen_path = os.path.join(IMG_DIR, "fondo_interfaz.jpg")
 
     ventana_empleado = tk.Tk()
-    ventana_empleado.title("Vista Empleado")
+    ventana_empleado.title(titulo)
     ventana_empleado.geometry("400x300")
     ventana_empleado.configure(bg="#e6f0ff")
+
+    if os.path.exists(icon_path):
+        vista_empleado.iconbitmap(icon_path)
+
+    imagen_path = directorio_img("fondo_interfaz.jpg")
 
     try:
         if os.path.exists(imagen_path):
@@ -35,7 +47,7 @@ def vista_empleado(nombre):
 
     # Encabezado
     tk.Label(ventana_empleado, text="Vista Empleado", font=("Arial", 14, "bold")).pack(pady=30)
-    tk.Label(ventana_empleado, text=f"Hola: {nombre}", font=("Arial", 12)).pack(pady=5)
+    tk.Label(ventana_empleado, text=f"Hola: {nombre}", font=("Arial", 12)).place(relx=1.0, y=10, anchor="ne")
 
     # Botón para pacientes
     tk.Button(ventana_empleado, text="Pacientes", width=20, height=2, bg="#007A8D", fg="white",
@@ -55,11 +67,15 @@ def vista_empleado(nombre):
 # MENÚ DE PACIENTES
 # ==========================
 def menu_pacientes():
+    global icon_path, titulo
     ventana_empleado.destroy()
     ventana_pac_menu = tk.Tk()
-    ventana_pac_menu.title("Menú de Pacientes")
+    ventana_pac_menu.title(titulo)
     ventana_pac_menu.geometry("400x350")
     ventana_pac_menu.configure(bg="#e6f0ff")
+
+    if os.path.exists(icon_path):
+        menu_pacientes.iconbitmap(icon_path)
 
     # Encabezado
     tk.Label(ventana_pac_menu, text="Gestión de Pacientes", font=("Arial", 16, "bold")).pack(pady=20)
@@ -87,10 +103,14 @@ def menu_pacientes():
 # ==========================
 def abrir_paciente():
     global entry_codigo, entry_nombre, entry_direccion, entry_telefono, entry_fecha_nac, combo_sexo, entry_edad, entry_estatura
+    global icon_path, titulo
     ventana_pac = tk.Tk()
-    ventana_pac.title("Gestión de Pacientes")
+    ventana_pac.title(titulo)
     ventana_pac.geometry("900x600")
     ventana_pac.configure(bg="#e6f0ff")
+
+    if os.path.exists(icon_path):
+        abrir_paciente.iconbitmap(icon_path)
 
     frame = tk.LabelFrame(ventana_pac, text="Insertar Paciente", padx=10, pady=10)
     frame.pack(fill="x", padx=10, pady=10)
@@ -135,6 +155,7 @@ def abrir_paciente():
 # FUNCIÓN DE CONSULTA PACIENTES
 # ==========================
 def consultar_pacientes():
+    global icon_path, titulo
     conn = connect.conectar()
     if conn:
         try:
@@ -145,8 +166,11 @@ def consultar_pacientes():
             conn.close()
 
             ventana_consulta = tk.Toplevel()
-            ventana_consulta.title("Consulta de Pacientes")
+            ventana_consulta.title(titulo)
             ventana_consulta.geometry("900x400")
+
+            if os.path.exists(icon_path):
+                ventana_consulta.iconbitmap(icon_path)
 
             # Definir columnas para pacientes
             columnas = ("Código", "Nombre", "Dirección", "Teléfono", "Fecha Nac", "Sexo", "Edad", "Estatura")

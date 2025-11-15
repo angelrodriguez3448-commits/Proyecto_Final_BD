@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 import Vista_Emp as emp
 import Vista_Admin as adm
+import os
 
 # ==========================
 # CONFIGURACIÓN DE CONEXIÓN
@@ -13,6 +14,16 @@ DB_PASSWORD = "12345"
 DB_HOST = "localhost"
 DB_PORT = "5432"
 usuario = ""
+
+titulo = "ND: La salud es lo primero"
+
+def directorio_img(elemento):
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    IMG_DIR = os.path.join(BASE_DIR, "img")
+    path = os.path.join(IMG_DIR, elemento)
+    return path
+
+icon_path = directorio_img("ND_icono.ico")
 
 def conectar():
     try:
@@ -33,10 +44,14 @@ def conectar():
 # INTERFAZ DE LOGIN
 # ==========================
 def ventana_login():
+    global icon_path,titulo
     login = tk.Tk()
-    login.title("Ingreso del administrador")
+    login.title(titulo)
     login.geometry("400x300")
     login.configure(bg="#e6f0ff")
+
+    if os.path.exists(icon_path):
+        login.iconbitmap(icon_path)
 
     tk.Label(login, text="La salud lo es todo", font=("Arial", 20, "bold")).pack(pady=20)
     tk.Label(login, text="Inicio de sesion", font=("Arial", 10, "bold")).pack(pady=20)
