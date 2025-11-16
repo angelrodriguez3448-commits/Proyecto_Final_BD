@@ -28,7 +28,7 @@ def vista_empleado(nombre):
     ventana_empleado.configure(bg="#e6f0ff")
 
     if os.path.exists(icon_path):
-        vista_empleado.iconbitmap(icon_path)
+        ventana_empleado.iconbitmap(icon_path)
 
     imagen_path = directorio_img("fondo_interfaz.jpg")
 
@@ -75,7 +75,7 @@ def menu_pacientes():
     ventana_pac_menu.configure(bg="#e6f0ff")
 
     if os.path.exists(icon_path):
-        menu_pacientes.iconbitmap(icon_path)
+        ventana_pac_menu.iconbitmap(icon_path)
 
     # Encabezado
     tk.Label(ventana_pac_menu, text="Gestión de Pacientes", font=("Arial", 16, "bold")).pack(pady=20)
@@ -90,7 +90,7 @@ def menu_pacientes():
 
     # Botón para volver al menú principal
     tk.Button(ventana_pac_menu, text="↩ Volver al menú principal", bg="#005563", fg="white", width=25, height=2,
-              command=lambda:[ventana_pac_menu.destroy(), vista_empleado()]).place(relx=0.40, rely=0.95, anchor="se")
+              command=lambda:[ventana_pac_menu.destroy(), vista_empleado(nom)]).place(relx=0.40, rely=0.95, anchor="se")
 
     # Botón para salir
     tk.Button(ventana_pac_menu, text="Salir", bg="#828181", fg="white", width=25, height=2,
@@ -110,7 +110,7 @@ def abrir_paciente():
     ventana_pac.configure(bg="#e6f0ff")
 
     if os.path.exists(icon_path):
-        abrir_paciente.iconbitmap(icon_path)
+        ventana_pac.iconbitmap(icon_path)
 
     frame = tk.LabelFrame(ventana_pac, text="Insertar Paciente", padx=10, pady=10)
     frame.pack(fill="x", padx=10, pady=10)
