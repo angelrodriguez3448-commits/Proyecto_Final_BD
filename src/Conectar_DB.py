@@ -15,7 +15,7 @@ DB_HOST = "localhost"
 DB_PORT = "5432"
 usuario = ""
 
-titulo = "ND: La salud es lo primero"
+titulo = "ND: La salud lo es todo"
 
 def directorio_img(elemento):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

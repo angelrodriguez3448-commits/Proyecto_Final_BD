@@ -13,7 +13,7 @@ def directorio_img(elemento):
 
 icon_path = directorio_img("ND_icono.ico")
 
-titulo = "ND: La salud es lo primero"
+titulo = "ND: La salud lo es todo"
 
 # ==========================
 # VISTA EMPLEADO (Vista empleado)
