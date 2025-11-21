@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from tkcalendar import DateEntry
 from PIL import Image, ImageTk
 import os
 from datetime import datetime
@@ -258,29 +259,46 @@ def abrir_empleado():
     frame = tk.LabelFrame(ventana_emp, text="Insertar Empleado", padx=10, pady=10)
     frame.pack(fill="x", padx=10, pady=10)
 
-    campos = [
-        ("ID", "entry_id"), ("Nombre", "entry_nombre"), ("Dirección", "entry_direccion"),
-        ("Teléfono", "entry_telefono"), ("Fecha Nac (YYYY-MM-DD)", "entry_fecha"),
-        ("Sexo", "combo_sexo"), ("Sueldo", "entry_sueldo"), ("Turno", "combo_turno"),
-        ("Contraseña", "entry_contrasena"),
-    ]
+    tk.Label(frame, text="ID:").grid(row=0, column=0, sticky="e")
+    entry_id = tk.Entry(frame, width=40)
+    entry_id.grid(row=0, column=1)
 
-    for i, (label, var) in enumerate(campos):
-        tk.Label(frame, text=label + ":").grid(row=i, column=0, sticky="e")
-        if "combo" in var:
-            if var == "combo_sexo":
-                combo_sexo = ttk.Combobox(frame, values=["FEMENINO", "MASCULINO"])
-                combo_sexo.grid(row=i, column=1)
-            else:
-                combo_turno = ttk.Combobox(frame, values=["MATUTINO", "VESPERTINO", "NOCTURNO"])
-                combo_turno.grid(row=i, column=1)
-        else:
-            entry = tk.Entry(frame, width=40, show="*" if "contrasena" in var else "")
-            entry.grid(row=i, column=1)
-            globals()[var] = entry
+    tk.Label(frame, text="Nombre:").grid(row=1, column=0, sticky="e")
+    entry_nombre = tk.Entry(frame, width=40)
+    entry_nombre.grid(row=1, column=1)
 
-    tk.Button(frame, text="Insertar Empleado", command=insertar_empleado,bg="#00C0DE", fg="white").grid(row=len(campos), column=0, pady=15)
-    tk.Button(ventana_emp, text="↩ Volver al menú principal",  bg="#005563", fg="white", width=25, height=2, 
+    tk.Label(frame, text="Dirección:").grid(row=2, column=0, sticky="e")
+    entry_direccion = tk.Entry(frame, width=40)
+    entry_direccion.grid(row=2, column=1)
+
+    tk.Label(frame, text="Teléfono:").grid(row=3, column=0, sticky="e")
+    entry_telefono = tk.Entry(frame, width=40)
+    entry_telefono.grid(row=3, column=1)
+
+    tk.Label(frame, text="Fecha Nac:").grid(row=4, column=0, sticky="e")
+    entry_fecha = DateEntry(frame, width=37, date_pattern="yyyy-mm-dd")
+    entry_fecha.grid(row=4, column=1)
+
+    tk.Label(frame, text="Sexo:").grid(row=5, column=0, sticky="e")
+    combo_sexo = ttk.Combobox(frame, values=["FEMENINO", "MASCULINO"])
+    combo_sexo.grid(row=5, column=1)
+
+    tk.Label(frame, text="Sueldo:").grid(row=6, column=0, sticky="e")
+    entry_sueldo = tk.Entry(frame, width=40)
+    entry_sueldo.grid(row=6, column=1)
+
+    tk.Label(frame, text="Turno:").grid(row=7, column=0, sticky="e")
+    combo_turno = ttk.Combobox(frame, values=["MATUTINO", "VESPERTINO", "NOCTURNO"])
+    combo_turno.grid(row=7, column=1)
+
+    tk.Label(frame, text="Contraseña:").grid(row=8, column=0, sticky="e")
+    entry_contrasena = tk.Entry(frame, width=40, show="*")
+    entry_contrasena.grid(row=8, column=1)
+
+    tk.Button(frame, text="Insertar Empleado", command=insertar_empleado,
+              bg="#00C0DE", fg="white").grid(row=9, column=0, pady=15)
+
+    tk.Button(ventana_emp, text="↩ Volver al menú principal", bg="#005563", fg="white", width=25, height=2, 
               command=lambda:[ventana_emp.destroy(), menu_principal(nom)]).place(relx=0.40, rely=0.95, anchor="se")
     tk.Button(ventana_emp, text="Salir", bg="#828181", fg="white", width=25, height=2, 
               command=ventana_emp.destroy).place(relx=0.95, rely=0.95, anchor="se")
@@ -303,29 +321,41 @@ def abrir_doctores():
     frame = tk.LabelFrame(ventana_doc, text="Insertar nuevo doctor", padx=10, pady=10)
     frame.pack(fill="x", padx=10, pady=10)
 
-    campos_doc = [
-        ("ID", "entry_doc_id"),
-        ("Nombre", "entry_doc_nombre"),
-        ("Dirección", "entry_doc_direccion"),
-        ("Teléfono", "entry_doc_telefono"),
-        ("Fecha Nac (YYYY-MM-DD)", "entry_doc_fecha"),
-        ("Sexo", "combo_doc_sexo"),
-        ("Especialidad", "entry_doc_especialidad"),
-        ("Contraseña", "entry_doc_contrasena"),
-    ]
+    tk.Label(frame, text="ID:").grid(row=0, column=0, sticky="e")
+    entry_doc_id = tk.Entry(frame, width=40)
+    entry_doc_id.grid(row=0, column=1)
 
-    for i, (label, var) in enumerate(campos_doc):
-        tk.Label(frame, text=label + ":").grid(row=i, column=0, sticky="e")
-        if var == "combo_doc_sexo":
-            combo_doc_sexo = ttk.Combobox(frame, values=["FEMENINO", "MASCULINO"])
-            combo_doc_sexo.grid(row=i, column=1)
-        else:
-            entry = tk.Entry(frame, width=40, show="*" if "contrasena" in var else "")
-            entry.grid(row=i, column=1)
-            globals()[var] = entry
+    tk.Label(frame, text="Nombre:").grid(row=1, column=0, sticky="e")
+    entry_doc_nombre = tk.Entry(frame, width=40)
+    entry_doc_nombre.grid(row=1, column=1)
+
+    tk.Label(frame, text="Dirección:").grid(row=2, column=0, sticky="e")
+    entry_doc_direccion = tk.Entry(frame, width=40)
+    entry_doc_direccion.grid(row=2, column=1)
+
+    tk.Label(frame, text="Teléfono:").grid(row=3, column=0, sticky="e")
+    entry_doc_telefono = tk.Entry(frame, width=40)
+    entry_doc_telefono.grid(row=3, column=1)
+
+    tk.Label(frame, text="Fecha Nac:").grid(row=4, column=0, sticky="e")
+    entry_doc_fecha = DateEntry(frame, width=37, date_pattern="yyyy-mm-dd")
+    entry_doc_fecha.grid(row=4, column=1)
+
+    tk.Label(frame, text="Sexo:").grid(row=5, column=0, sticky="e")
+    combo_doc_sexo = ttk.Combobox(frame, values=["FEMENINO", "MASCULINO"])
+    combo_doc_sexo.grid(row=5, column=1)
+
+    tk.Label(frame, text="Especialidad:").grid(row=6, column=0, sticky="e")
+    entry_doc_especialidad = tk.Entry(frame, width=40)
+    entry_doc_especialidad.grid(row=6, column=1)
+
+    tk.Label(frame, text="Contraseña:").grid(row=7, column=0, sticky="e")
+    entry_doc_contrasena = tk.Entry(frame, width=40, show="*")
+    entry_doc_contrasena.grid(row=7, column=1)
 
     tk.Button(frame, text="Insertar Doctor", command=insertar_doctor,
-              bg="#00C0DE", fg="white").grid(row=len(campos_doc), column=0, columnspan=2, pady=15)
+              bg="#00C0DE", fg="white").grid(row=8, column=0, pady=15)
+
     tk.Button(ventana_doc, text="↩ Volver al menú principal", bg="#005563", fg="white", width=25, height=2, 
               command=lambda:[ventana_doc.destroy(), menu_principal(nom)]).place(relx=0.40, rely=0.95, anchor="se")
     tk.Button(ventana_doc, text="Salir", bg="#828181", fg="white", width=25, height=2, 
