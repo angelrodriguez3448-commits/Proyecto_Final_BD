@@ -263,6 +263,9 @@ def menu_citas():
 
     tk.Button(ventana_citas, text="Consultar Citas", bg="#00C0DE", fg="white", width=25, height=2,
               command=consultar_citas).pack(pady=10)
+    
+    tk.Button(ventana_citas, text="Modificar / Borrar Cita", bg="#E48C14", fg="white", width=25, height=2, 
+              command=lambda: [ventana_citas.destroy(), modificar_citas()]).pack(pady=10)
 
     tk.Button(ventana_citas, text="↩ Volver al menú principal", bg="#005563", fg="white",
               width=25, height=2, command=lambda:[ventana_citas.destroy(), vista_empleado(nom)]).place(relx=0.40, rely=0.95, anchor="se")
@@ -628,3 +631,244 @@ def consultar_citas():
 
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo consultar citas:\n{e}")
+
+# ==========================================================
+#   MODIFICAR / BORRAR CITA  (Formulario abajo)
+# ==========================================================
+def modificar_citas():
+    win = tk.Tk()
+    win.title("Modificar / Borrar Cita")
+    win.geometry("900x500")
+    win.configure(bg="#e6f0ff")
+
+    tk.Label(win, text="Modificar o Borrar Citas",
+             font=("Arial", 16, "bold"), bg="#e6f0ff").pack(pady=10)
+
+    # ----------- CARGAR PACIENTES Y DOCTORES -----------
+    pacientes_list, doctores_list, map_pac, map_doc = cargar_pacientes_doctores()
+
+    # ----------- TABLA -----------
+
+    frame_tabla = tk.Frame(win)
+    frame_tabla.pack(fill="both", expand=True)
+
+    columnas = ("Código", "Paciente", "Doctor", "Fecha", "Hora")
+    tree = ttk.Treeview(frame_tabla, columns=columnas, show="headings", height=10)
+
+    for col in columnas:
+        tree.heading(col, text=col)
+        tree.column(col, width=150)
+
+    tree.pack(fill="both", expand=True)
+
+    # ----------- CARGAR DATOS -----------
+
+    def cargar_citas_tabla():
+        for i in tree.get_children():
+            tree.delete(i)
+
+        conn = connect.conectar()
+        if not conn:
+            return
+
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT c.codigo, p.nombre, d.nombre, c.fecha, c.hora
+                FROM hospital.cita c
+                LEFT JOIN hospital.paciente p ON c.cod_paciente = p.codigo
+                LEFT JOIN hospital.doctor d ON c.cod_doctor = d.codigo
+                ORDER BY c.fecha, c.hora;
+            """)
+            registros = cur.fetchall()
+            cur.close()
+            conn.close()
+
+            for fila in registros:
+                cod, pac, doc, fecha, hora = fila
+                fecha_str = fecha.strftime("%Y-%m-%d")
+                hora_str = hora.strftime("%H:%M")
+                tree.insert("", "end", values=(cod, pac, doc, fecha_str, hora_str))
+
+        except:
+            pass
+
+    cargar_citas_tabla()
+
+    # ====================================================
+    #                FORMULARIO ABAJO
+    # ====================================================
+
+    frame = tk.LabelFrame(win, text="Editar Cita", bg="#e6f0ff",
+                          padx=15, pady=15)
+    frame.pack(fill="x", pady=10)
+
+    tk.Label(frame, text="Paciente:", bg="#e6f0ff").grid(row=0, column=0)
+    combo_pac = ttk.Combobox(frame, values=pacientes_list, width=40)
+    combo_pac.grid(row=0, column=1, padx=5)
+
+    tk.Label(frame, text="Doctor:", bg="#e6f0ff").grid(row=1, column=0)
+    combo_doc = ttk.Combobox(frame, values=doctores_list, width=40)
+    combo_doc.grid(row=1, column=1, padx=5)
+
+    tk.Label(frame, text="Fecha:", bg="#e6f0ff").grid(row=2, column=0)
+    entry_fecha = DateEntry(frame, width=37, date_pattern="yyyy-mm-dd")
+    entry_fecha.grid(row=2, column=1, padx=5)
+
+    tk.Label(frame, text="Hora (HH:MM):", bg="#e6f0ff").grid(row=3, column=0)
+    entry_hora = tk.Entry(frame, width=40)
+    entry_hora.grid(row=3, column=1, padx=5)
+
+    cita_sel = {"codigo": None}
+
+    # ====================================================
+    #       SELECCIONAR FILA — CARGAR EN FORMULARIO
+    # ====================================================
+    def seleccionar(event):
+        item = tree.focus()
+        if not item:
+            return
+
+        cod, pac, doc, fecha, hora = tree.item(item, "values")
+
+        cita_sel["codigo"] = cod
+
+        combo_pac.set(pac)
+        combo_doc.set(doc)
+        entry_fecha.set_date(fecha)
+        entry_hora.delete(0, tk.END)
+        entry_hora.insert(0, hora)
+
+    tree.bind("<<TreeviewSelect>>", seleccionar)
+
+    # ====================================================
+    #                 ACTUALIZAR CITA
+    # ====================================================
+    def actualizar_cita():
+        if not cita_sel["codigo"]:
+            messagebox.showwarning("Selecciona una cita",
+                                   "Debes seleccionar una cita para modificar.")
+            return
+
+        pac = combo_pac.get().strip()
+        doc = combo_doc.get().strip()
+        fecha = entry_fecha.get().strip()
+        hora = entry_hora.get().strip()
+
+        if not (pac and doc and fecha and hora):
+            messagebox.showwarning("Datos incompletos",
+                                   "Todos los campos son obligatorios.")
+            return
+
+        if pac not in map_pac:
+            messagebox.showerror("Paciente inválido", "Selecciona un paciente válido.")
+            return
+        if doc not in map_doc:
+            messagebox.showerror("Doctor inválido", "Selecciona un doctor válido.")
+            return
+
+        cod_pac = map_pac[pac]
+        cod_doc = map_doc[doc]
+
+        # Validar fecha/hora
+        try:
+            fecha_obj = datetime.strptime(fecha, "%Y-%m-%d").date()
+            hora_obj = datetime.strptime(hora, "%H:%M").time()
+        except:
+            messagebox.showerror("Error de formato",
+                                 "Fecha u hora en formato incorrecto.")
+            return
+
+        if fecha_obj.weekday() > 4:
+            messagebox.showerror("Error", "Solo se permiten citas de lunes a viernes.")
+            return
+
+        if not (dtime(9, 0) <= hora_obj <= dtime(20, 0)):
+            messagebox.showerror("Hora inválida",
+                                 "Horario permitido de 09:00 AM a 08:00 PM.")
+            return
+
+        # Validar conflicto de doctor
+        conn = connect.conectar()
+        if not conn:
+            return
+
+        try:
+            cur = conn.cursor()
+
+            cur.execute("""
+                SELECT 1 FROM hospital.cita
+                WHERE cod_doctor = %s AND fecha = %s AND hora = %s
+                  AND codigo <> %s
+                LIMIT 1;
+            """, (cod_doc, fecha_obj, hora_obj, cita_sel["codigo"]))
+
+            if cur.fetchone():
+                messagebox.showerror("Conflicto",
+                                     "El doctor ya tiene una cita a esa hora.")
+                return
+
+            # Actualizar
+            cur.execute("""
+                UPDATE hospital.cita
+                SET cod_paciente = %s,
+                    cod_doctor = %s,
+                    fecha = %s,
+                    hora = %s
+                WHERE codigo = %s
+            """, (cod_pac, cod_doc, fecha_obj, hora_obj, cita_sel["codigo"]))
+
+            conn.commit()
+            cur.close()
+            conn.close()
+
+            messagebox.showinfo("Éxito", "Cita actualizada correctamente.")
+            cargar_citas_tabla()
+
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo actualizar:\n{e}")
+
+    # ====================================================
+    #                   BORRAR CITA
+    # ====================================================
+    def borrar_cita():
+        if not cita_sel["codigo"]:
+            messagebox.showwarning("Selecciona una cita",
+                                   "Selecciona una cita para borrar.")
+            return
+
+        if not messagebox.askyesno("Confirmar", "¿Seguro que deseas borrar la cita?"):
+            return
+
+        conn = connect.conectar()
+        if not conn:
+            return
+
+        try:
+            cur = conn.cursor()
+            cur.execute("DELETE FROM hospital.cita WHERE codigo = %s",
+                        (cita_sel["codigo"],))
+            conn.commit()
+            cur.close()
+            conn.close()
+
+            messagebox.showinfo("Eliminado", "Cita borrada correctamente.")
+            cargar_citas_tabla()
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo borrar:\n{e}")
+
+    # -------- Botones --------
+
+    tk.Button(frame, text="Actualizar", bg="#3FA34D", fg="white",
+              width=20, command=actualizar_cita).grid(row=4, column=0, pady=15)
+
+    tk.Button(frame, text="Borrar", bg="#C62828", fg="white",
+              width=20, command=borrar_cita).grid(row=4, column=1, pady=15)
+
+    tk.Button(win, text="↩ Volver", bg="#005563", fg="white", width=20,
+              command=lambda: [win.destroy(), menu_citas()]).place(x=50, y=450)
+
+    tk.Button(win, text="Salir", bg="#828181", fg="white", width=20,
+              command=win.destroy).place(x=700, y=450)
+
+    win.mainloop()
