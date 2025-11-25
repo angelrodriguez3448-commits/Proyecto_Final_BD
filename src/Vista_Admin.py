@@ -47,6 +47,8 @@ def menu_principal(nombre):
               command=menu_empleados).pack(pady=10)
     tk.Button(ventana_menu, text="Doctores", width=20, height=2, bg="#00C0DE", fg="white",
               command=menu_doctores).pack(pady=10)
+    tk.Button(ventana_menu, text="Medicamentos", width=20, height=2, bg="#00995E", fg="white",
+            command=menu_medicamentos).pack(pady=10)
     tk.Button(ventana_menu, text="Cerrar Sesión", width=20, height=2, bg="#005563", fg="white", 
               command=lambda:[ventana_menu.destroy(), connect.ventana_login()]).place(relx=0.40, rely=0.95, anchor="se")
     tk.Button(ventana_menu, text="Salir", width=20, height=2, bg="#828181", fg="white", 
@@ -112,6 +114,38 @@ def consultar_doctores():
 
             for fila in registros:
                 tree.insert("", "end", values=fila)
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo consultar:\n{e}")
+
+def consultar_medicamentos():
+    conn = connect.conectar()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM hospital.medicamento ORDER BY codigo;")
+            registros = cur.fetchall()
+            cur.close()
+            conn.close()
+
+            ventana_consulta = tk.Toplevel()
+            ventana_consulta.title("Medicamentos")
+            ventana_consulta.geometry("900x400")
+
+            if os.path.exists(icon_path):
+                ventana_consulta.iconbitmap(icon_path)
+
+            columnas = ("Código", "Nombre", "Vía Adm", "Presentación", "Fecha Cad")
+            tree = ttk.Treeview(ventana_consulta, columns=columnas, show="headings")
+
+            for col in columnas:
+                tree.heading(col, text=col)
+                tree.column(col, width=150)
+
+            tree.pack(fill="both", expand=True)
+
+            for fila in registros:
+                tree.insert("", "end", values=fila)
+
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo consultar:\n{e}")
 
@@ -194,6 +228,43 @@ def insertar_doctor():
             conn.close()
             messagebox.showerror("Error", f"No se pudo insertar:\n{e}")
 
+def insertar_medicamento():
+    codigo = entry_med_id.get().strip()
+    nombre = entry_med_nombre.get().strip()
+    via = combo_med_via.get().strip()
+    present = combo_med_present.get().strip()
+    fecha_cad = entry_med_fecha.get().strip()
+
+    if not (codigo and nombre and via and present and fecha_cad):
+        messagebox.showwarning("Campos vacíos", "Completa todos los campos.")
+        return
+
+    try:
+        fecha_obj = datetime.strptime(fecha_cad, "%Y-%m-%d").date()
+    except:
+        messagebox.showerror("Error", "Fecha incorrecta.")
+        return
+
+    conn = connect.conectar()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute("""
+                INSERT INTO hospital.medicamento (codigo, nombre, via_adm, presentacion, fecha_cad)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (codigo, nombre, via, present, fecha_obj))
+
+            conn.commit()
+            messagebox.showinfo("Éxito", "Medicamento agregado correctamente.")
+
+        except Exception as e:
+            conn.rollback()
+            messagebox.showerror("Error", f"No se pudo insertar:\n{e}")
+
+        finally:
+            cur.close()
+            conn.close()
+
 # ==========================
 # MENÚ DE EMPLEADOS
 # ==========================
@@ -241,6 +312,38 @@ def menu_doctores():
               command=lambda:[ventana_doc_menu.destroy(), menu_principal(nom)]).place(relx=0.40, rely=0.95, anchor="se")
     tk.Button(ventana_doc_menu, text="Salir", bg="#828181", fg="white", width=25, height=2, 
               command=ventana_doc_menu.destroy).place(relx=0.95, rely=0.95, anchor="se")
+
+# ==========================
+# MENÚ DE MEDICAMENTOS
+# ==========================
+def menu_medicamentos():
+    ventana_menu.destroy()
+    ventana_med_menu = tk.Tk()
+    ventana_med_menu.title(titulo)
+    ventana_med_menu.geometry("400x350")
+    ventana_med_menu.configure(bg="#e6f0ff")
+
+    if os.path.exists(icon_path):
+        ventana_med_menu.iconbitmap(icon_path)
+
+    tk.Label(ventana_med_menu, text="Gestión de Medicamentos", 
+             font=("Arial", 16, "bold")).pack(pady=20)
+
+    tk.Button(ventana_med_menu, text="Agregar Medicamento",
+              bg="#007A8D", fg="white", width=25, height=2,
+              command=lambda:[ventana_med_menu.destroy(), abrir_medicamentos()]).pack(pady=10)
+
+    tk.Button(ventana_med_menu, text="Ver Medicamentos",
+              bg="#00C0DE", fg="white", width=25, height=2,
+              command=consultar_medicamentos).pack(pady=10)
+
+    tk.Button(ventana_med_menu, text="↩ Volver al menú principal",
+              bg="#005563", fg="white", width=25, height=2,
+              command=lambda:[ventana_med_menu.destroy(), menu_principal(nom)]).place(relx=0.40, rely=0.95, anchor="se")
+
+    tk.Button(ventana_med_menu, text="Salir",
+              bg="#828181", fg="white", width=25, height=2,
+              command=ventana_med_menu.destroy).place(relx=0.95, rely=0.95, anchor="se")
 
 # ==========================
 # VENTANA DE EMPLEADOS
@@ -360,3 +463,48 @@ def abrir_doctores():
               command=lambda:[ventana_doc.destroy(), menu_principal(nom)]).place(relx=0.40, rely=0.95, anchor="se")
     tk.Button(ventana_doc, text="Salir", bg="#828181", fg="white", width=25, height=2, 
               command=ventana_doc.destroy).place(relx=0.95, rely=0.95, anchor="se")
+ 
+def abrir_medicamentos():
+    global entry_med_id, entry_med_nombre, combo_med_via, combo_med_present, entry_med_fecha
+
+    ventana_med = tk.Tk()
+    ventana_med.title(titulo)
+    ventana_med.geometry("700x500")
+    ventana_med.configure(bg="#e6f0ff")
+
+    if os.path.exists(icon_path):
+        ventana_med.iconbitmap(icon_path)
+
+    frame = tk.LabelFrame(ventana_med, text="Agregar Medicamento", padx=10, pady=10)
+    frame.pack(fill="x", padx=10, pady=10)
+
+    tk.Label(frame, text="Código:").grid(row=0, column=0, sticky="e")
+    entry_med_id = tk.Entry(frame, width=40)
+    entry_med_id.grid(row=0, column=1)
+
+    tk.Label(frame, text="Nombre:").grid(row=1, column=0, sticky="e")
+    entry_med_nombre = tk.Entry(frame, width=40)
+    entry_med_nombre.grid(row=1, column=1)
+
+    tk.Label(frame, text="Vía Administración:").grid(row=2, column=0, sticky="e")
+    combo_med_via = ttk.Combobox(frame, values=["ORAL", "INYECCIÓN", "CUTÁNEA"])
+    combo_med_via.grid(row=2, column=1)
+
+    tk.Label(frame, text="Presentación:").grid(row=3, column=0, sticky="e")
+    combo_med_present = ttk.Combobox(frame, values=["TABLETA", "CAPSULA", "CREMA", "JARABE"])
+    combo_med_present.grid(row=3, column=1)
+
+    tk.Label(frame, text="Fecha Cad:").grid(row=4, column=0, sticky="e")
+    entry_med_fecha = DateEntry(frame, width=37, date_pattern="yyyy-mm-dd")
+    entry_med_fecha.grid(row=4, column=1)
+
+    tk.Button(frame, text="Guardar Medicamento", command=insertar_medicamento,
+              bg="#00C0DE", fg="white").grid(row=5, column=0, pady=15)
+
+    tk.Button(ventana_med, text="↩ Volver al menú principal",
+              bg="#005563", fg="white", width=25, height=2,
+              command=lambda:[ventana_med.destroy(), menu_principal(nom)]).place(relx=0.40, rely=0.95, anchor="se")
+
+    tk.Button(ventana_med, text="Salir",
+              bg="#828181", fg="white", width=25, height=2,
+              command=ventana_med.destroy).place(relx=0.95, rely=0.95, anchor="se")

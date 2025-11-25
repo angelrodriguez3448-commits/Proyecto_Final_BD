@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import messagebox
 import Vista_Emp as emp
 import Vista_Admin as adm
+import Vista_Doc as doc
+
 import os
 
 # ==========================
@@ -85,19 +87,25 @@ def ventana_login():
                     cur.close()
                     conn.close()
 
-                    for i in registros:
-                        user, nombre, passw = i
-                        print(i)
-                        if usuario == user and contrasena == passw:
-                            messagebox.showinfo("Acceso concedido", "Bienvenido al sistema.")
-                            login.destroy()
-                            if i in registrosEmp:
-                                emp.vista_empleado(nombre)
-                            else:
-                                emp.menu_principal(nombre) #Temporal hasta tener las otras vistas
-                            break
+                encontrado = False   # ← bandera SOLO AQUÍ
+
+                for i in registros:
+                    user, nombre, passw = i
+                    
+                    if usuario == user and contrasena == passw:
+                        encontrado = True
+                        messagebox.showinfo("Acceso concedido", "Bienvenido al sistema.")
+                        login.destroy()
+
+                        if i in registrosEmp:
+                            emp.vista_empleado(nombre)
                         else:
-                            messagebox.showerror("Error", "Usuario o contraseña incorrectos.")
+                            doc.vista_doctor(nombre, user)
+
+                        break  
+
+                if not encontrado:
+                    messagebox.showerror("Error", "Usuario o contraseña incorrectos.")
 
             except Exception as e:
                 messagebox.showerror("Error", f"No se ha podido conectar con la base de datos:\n{e}")
@@ -106,4 +114,3 @@ def ventana_login():
 
     tk.Button(login, text="Ingresar", bg="#005563", fg="white", width=25, height=2, command=verificar_login).pack(pady=20)
     login.mainloop()
-
