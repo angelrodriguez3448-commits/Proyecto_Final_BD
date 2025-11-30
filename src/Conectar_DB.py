@@ -69,10 +69,11 @@ def ventana_login():
         usuario = user_e.get().strip()
         contrasena = pass_e.get().strip()
         conn = conectar()
-        
         if conn:
             try:
+                encontrado = False   # ← bandera SOLO AQUÍ
                 if usuario == DB_USER and contrasena == DB_PASSWORD:
+                    encontrado = True
                     messagebox.showinfo("Acceso concedido", "Bienvenido al sistema.")
                     login.destroy()
                     adm.menu_principal("administrador")
@@ -87,22 +88,20 @@ def ventana_login():
                     cur.close()
                     conn.close()
 
-                encontrado = False   # ← bandera SOLO AQUÍ
+                    for i in registros:
+                        user, nombre, passw = i
+                        
+                        if usuario == user and contrasena == passw:
+                            encontrado = True
+                            messagebox.showinfo("Acceso concedido", "Bienvenido al sistema.")
+                            login.destroy()
 
-                for i in registros:
-                    user, nombre, passw = i
-                    
-                    if usuario == user and contrasena == passw:
-                        encontrado = True
-                        messagebox.showinfo("Acceso concedido", "Bienvenido al sistema.")
-                        login.destroy()
+                            if i in registrosEmp:
+                                emp.vista_empleado(nombre)
+                            else:
+                                doc.vista_doctor(nombre, user)
 
-                        if i in registrosEmp:
-                            emp.vista_empleado(nombre)
-                        else:
-                            doc.vista_doctor(nombre, user)
-
-                        break  
+                            break 
 
                 if not encontrado:
                     messagebox.showerror("Error", "Usuario o contraseña incorrectos.")
